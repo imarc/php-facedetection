@@ -80,58 +80,15 @@ class FaceDetector
             throw new Exception("Can not load $file");
         }
 
-        $im_width = imagesx($this->canvas);
-        $im_height = imagesy($this->canvas);
+        $stats = $this->getImgStats($this->canvas);
 
-        //Resample before detection?
-        $diff_width = 320 - $im_width;
-        $diff_height = 240 - $im_height;
-        if ($diff_width > $diff_height) {
-            $ratio = $im_width / 320;
-        } else {
-            $ratio = $im_height / 240;
-        }
-
-        if ($ratio != 0) {
-            $this->reduced_canvas = imagecreatetruecolor($im_width / $ratio, $im_height / $ratio);
-
-            imagecopyresampled(
-                $this->reduced_canvas,
-                $this->canvas,
-                0,
-                0,
-                0,
-                0,
-                $im_width / $ratio,
-                $im_height / $ratio,
-                $im_width,
-                $im_height
-            );
-
-            $stats = $this->getImgStats($this->reduced_canvas);
-
-            $this->face = $this->doDetectGreedyBigToSmall(
-                $stats['ii'],
-                $stats['ii2'],
-                $stats['width'],
-                $stats['height']
-            );
-
-            if ($this->face['w'] > 0) {
-                $this->face['x'] *= $ratio;
-                $this->face['y'] *= $ratio;
-                $this->face['w'] *= $ratio;
-            }
-        } else {
-            $stats = $this->getImgStats($this->canvas);
-
-            $this->face = $this->doDetectGreedyBigToSmall(
-                $stats['ii'],
-                $stats['ii2'],
-                $stats['width'],
-                $stats['height']
-            );
-        }
+        $this->face = $this->doDetectGreedyBigToSmall(
+            $stats['ii'],
+            $stats['ii2'],
+            $stats['width'],
+            $stats['height']
+        );
+        
         return ($this->face['w'] > 0);
     }
 
